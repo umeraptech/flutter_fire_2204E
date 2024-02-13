@@ -5,7 +5,6 @@ import '../services/frm_validation.dart';
 import '../widgets/beveled_button.dart';
 import '../widgets/body_back.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -14,9 +13,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>(); 
+  final _formKey = GlobalKey<FormState>();
   late bool _obscured;
   final togglePassowrdFocusNode = FocusNode();
+  bool _isProcessing = false;
 
   String? email;
   String? pass;
@@ -28,30 +28,35 @@ class _LoginPageState extends State<LoginPage> {
     _obscured = true;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title:  Text('Login Page',
-      style: Theme.of(context).textTheme.titleMedium,),),
+      appBar: AppBar(
+        title: Text(
+          'Login Page',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
       body: BackGroundContainer(
         Padding(
-          padding: const EdgeInsets.fromLTRB(20,300,20,0),
+          padding: const EdgeInsets.fromLTRB(20, 300, 20, 0),
           child: fillBody(),
         ),
       ),
     );
   }
 
-  Widget fillBody(){
+  Widget fillBody() {
     return SafeArea(
       child: Form(
         key: _formKey,
         child: Column(
-          mainAxisSize:  MainAxisSize.max,
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            const SizedBox( height: 10.0,),
+            const SizedBox(
+              height: 10.0,
+            ),
             TextFormField(
               maxLength: 30,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -60,87 +65,106 @@ class _LoginPageState extends State<LoginPage> {
                 labelText: "User Email",
                 hintText: "Enter User Email",
                 prefixIcon: Icon(Icons.email_outlined),
-                
               ),
               validator: validateEmail,
-              onSaved: (value){
+              onSaved: (value) {
                 setState(() {
-                 email =value;
+                  email = value;
                 });
               },
             ),
-            const SizedBox(height: 10.0,),
+            const SizedBox(
+              height: 10.0,
+            ),
             TextFormField(
               obscureText: _obscured,
               maxLength: 8,
               style: Theme.of(context).textTheme.bodyMedium,
               keyboardType: TextInputType.number,
-              decoration:  InputDecoration(
-                labelText: "User Password",
-                hintText: "Enter User Passord",
-                prefixIcon: const Icon(Icons.key),
-                suffixIcon: Padding(
-                  padding:  const EdgeInsets.fromLTRB(0,0,4,0),
-                  child: GestureDetector(
-                    onTap: _toggleObscured,
-                    child: Icon(
-                      _obscured
-                        ?Icons.visibility_rounded
-                        :Icons.visibility_off_rounded,
+              decoration: InputDecoration(
+                  labelText: "User Password",
+                  hintText: "Enter User Passord",
+                  prefixIcon: const Icon(Icons.key),
+                  suffixIcon: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+                    child: GestureDetector(
+                      onTap: _toggleObscured,
+                      child: Icon(
+                        _obscured
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
                         size: 24,
+                      ),
                     ),
-                  ),
-                )
-              ),              
+                  )),
               validator: validatePass,
-              onSaved: (value){
+              onSaved: (value) {
                 setState(() {
-                 pass =value;
+                  pass = value;
                 });
               },
             ),
-           const SizedBox(height: 10.0,),
-           beveledButton( onTap: onLoginSubmit,title: 'Login'),
-           const SizedBox(height: 10.0,),
-           beveledButton( onTap: (){},title: 'Register'),
+            const SizedBox(
+              height: 10.0,
+            ),
+            _isProcessing
+                ? const SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Center(child: CircularProgressIndicator()))
+                : Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      beveledButton(onTap: onLoginSubmit, title: 'Login'),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      beveledButton(onTap: () {}, title: 'Register'),
+                    ],
+                  )
           ],
         ),
       ),
     );
   }
 
-  void _toggleObscured(){
+  void _toggleObscured() {
     setState(() {
       _obscured = !_obscured;
       if (togglePassowrdFocusNode.hasPrimaryFocus) {
         return;
-
       }
-      togglePassowrdFocusNode.canRequestFocus=false;
+      togglePassowrdFocusNode.canRequestFocus = false;
     });
   }
-  void onLoginSubmit(){
+
+  void onLoginSubmit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
       // ScaffoldMessenger.of(context)
       // .showSnackBar(const SnackBar(content: Text('Login in....')));
-
+      setState(() {
+        _isProcessing = true;
+      });
+      await Future.delayed(const Duration(seconds: 2), () {});
       _signInUser();
-      
+      setState(() {
+        _isProcessing = false;
+      });
     }
   }
 
-
-  void _signInUser(){
+  void _signInUser() {
     AuthenticateHelpler()
-    .signIn(email: email.toString(), password: pass.toString())
-    .then((value){
-      if (value==null) {
+        .signIn(email: email.toString(), password: pass.toString())
+        .then((value) {
+      if (value == null) {
         ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Succesfull login')));
-      }else{
+            .showSnackBar(const SnackBar(content: Text('Succesfull login')));
+      } else {
         ScaffoldMessenger.of(context)
-          .showSnackBar( SnackBar(content: Text(value)));
+            .showSnackBar(SnackBar(content: Text(value)));
       }
     });
   }
