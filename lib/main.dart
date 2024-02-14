@@ -32,6 +32,9 @@ class FirebaseLoginApp extends StatelessWidget {
         //   buttonColor: Colors.deepPurple,
         //   textTheme: ButtonTextTheme.primary
         //   ),
+        appBarTheme: const AppBarTheme(
+          color: Colors.blueGrey
+        ),
         textTheme: const TextTheme(
           titleMedium: TextStyle(fontFamily: "Gothic"),
           bodyMedium: TextStyle(fontFamily: "Gothic")

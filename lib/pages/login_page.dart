@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_login/widgets/custom_strings.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/task_screen.dart';
 import '../services/auth_service.dart';
 import '../services/frm_validation.dart';
 import '../widgets/beveled_button.dart';
@@ -33,6 +35,14 @@ class _LoginPageState extends State<LoginPage> {
     // TODO: implement initState
     super.initState();
     _obscured = true;
+
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    AuthenticateHelpler().signOut();
   }
 
   @override
@@ -181,25 +191,55 @@ class _LoginPageState extends State<LoginPage> {
     });
     await Future.delayed(const Duration(seconds: 2), () {});
     String? name;
-    String? u_email;
+    //String? u_email;
     bool? emailVerified;
-    String? uid;
+    //String? uid;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       // Name, email address, and profile photo URL
       name = user.displayName;
-      u_email = user.email;
+      //u_email = user.email;
       emailVerified = user.emailVerified;
-      uid = user.uid;
+      //uid = user.uid;
     }
 
     if (name == null) {
       // ScaffoldMessenger.of(context)
       //       .showSnackBar(const SnackBar(content: Text("Enter user name")));
-      _updateNameDialog();
-      //await user?.updateDisplayName(_userNameController.text.toUpperCase());
+      await _updateNameDialog();
+
+      String name = displayName.toString();
+       await Future.delayed(const Duration(seconds: 2), () {});
+      //ScaffoldMessenger.of(context)
+      //      .showSnackBar( SnackBar(content: Text(name.toTitleCase())));
+      await user?.updateDisplayName(name.toTitleCase());
+    }else{
+      await Future.delayed(const Duration(seconds: 2), () {});
+      ScaffoldMessenger.of(context)
+           .showSnackBar( SnackBar(content: Text("Welcome, ${name.toTitleCase()}")));
     }
+
+    await Future.delayed(const Duration(seconds: 2), () {});
+    if(emailVerified==false){
+      await Future.delayed(const Duration(seconds: 2), () {});
+      ScaffoldMessenger.of(context)
+           .showSnackBar(const SnackBar(content: Text("Your email is not varified\nSending verification email")));
+      await Future.delayed(const Duration(seconds: 2), () {});
+      await user?.sendEmailVerification();
+      await Future.delayed(const Duration(seconds: 2), () {});
+      await AuthenticateHelpler().signOut();
+      await Future.delayed(const Duration(seconds: 2), () {});
+      Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (BuildContext context) => super.widget));
+    }else{
+      String displayName = user!.displayName.toString();
+      await Future.delayed(const Duration(seconds: 2), () {});
+      Navigator.pushReplacement(context,MaterialPageRoute(builder: (BuildContext context) => TaskScreen(displayName:displayName)));
+    }
+
+
+
   }
 
   Future<void> _updateNameDialog() async {
@@ -208,6 +248,7 @@ class _LoginPageState extends State<LoginPage> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
+            backgroundColor: Colors.grey.shade800,
             title: Text('Add User Name', style: Theme.of(context).textTheme.titleMedium),
             content: Form(
               key: _dialogKey,
@@ -216,6 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: const InputDecoration(
                   hintText: 'Enter text',
+                  prefixIcon: Icon(Icons.perm_identity),
                 ),
                 validator: (text) {
                   if (text == null || text.isEmpty) {
@@ -237,6 +279,13 @@ class _LoginPageState extends State<LoginPage> {
                     }
                   },
                   title: 'Register'),
+              beveledButton(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (BuildContext context) => super.widget));
+                  },
+                  title: 'Cencel'),    
             ],
           );
         });

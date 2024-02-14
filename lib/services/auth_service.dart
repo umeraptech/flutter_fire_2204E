@@ -12,6 +12,11 @@ class AuthenticateHelpler{
       return e.message;
     }
   }
+
+  Future signOut() async{
+    await _auth.signOut();
+    return null;
+  }
 }
 
 
