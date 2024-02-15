@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_login/screens/task_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
@@ -20,6 +22,10 @@ class _LoginPageState extends State<LoginPage> {
 
   String? email;
   String? pass;
+
+  //dialog box form key
+  final _dialogKey = GlobalKey<FormState>();
+  String? displayName;
 
   @override
   void initState() {
@@ -152,6 +158,39 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _isProcessing = false;
       });
+       await Future.delayed(const Duration(seconds: 2), () {});
+       String? u_name;
+       bool? emailVarification;
+       String? email;
+
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user!=null) {
+        u_name = user.displayName;
+        emailVarification = user.emailVerified;
+       // email = user.email;
+      }
+
+      // ScaffoldMessenger.of(context)
+      //   .showSnackBar(SnackBar(content: Text("Welcome, ${u_name.toString()}")));
+      if (u_name==null) {
+         await _updateNameDialog();
+         await Future.delayed(const Duration(seconds: 2), () {});
+         String sname = displayName.toString();
+         await Future.delayed(const Duration(seconds: 2), () {});
+         await user?.updateDisplayName(sname.toUpperCase());
+         await Future.delayed(const Duration(seconds: 2), () {});
+         
+          
+      }
+
+      Navigator.pushReplacement(
+                  context, 
+                  MaterialPageRoute(
+                    builder: (BuildContext context)=>TaskScreen(displayName: u_name.toString())
+                  )
+                  );
+     
     }
   }
 
@@ -167,5 +206,68 @@ class _LoginPageState extends State<LoginPage> {
             .showSnackBar(SnackBar(content: Text(value)));
       }
     });
+  }
+
+  //dialog box for display name
+  Future <void> _updateNameDialog() async{
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, 
+      builder: (BuildContext context){
+        return AlertDialog(
+          backgroundColor: Colors.grey,
+          title: Text('Add User Name',
+          style: Theme.of(context).textTheme.titleMedium,
+          ),
+          content: Form(
+            key: _dialogKey,
+            child: TextFormField(
+              maxLength: 20,
+              style: Theme.of(context).textTheme.bodyMedium,
+              decoration: const InputDecoration(
+                hintText: "Enter Display Name",
+                prefixIcon: Icon(Icons.perm_identity)
+              ),
+              validator: (text){
+                if (text==null||text.isEmpty) {
+                  return "pleace enter display name";
+                }
+                return null;
+              },
+              onSaved: (value){
+                  displayName = value;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            beveledButton(title: "Register Name", onTap: (){
+              if (_dialogKey.currentState!.validate()) {
+                _dialogKey.currentState!.save();
+                Navigator.of(context).pop();
+                 Navigator.pushReplacement(
+                  context, 
+                  MaterialPageRoute(
+                    builder: (BuildContext context)=>super.widget
+                  )
+                  );
+              }
+            }),
+            beveledButton(title: "Cancel", onTap: (){
+              
+                _dialogKey.currentState!.save();
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context, 
+                  MaterialPageRoute(
+                    builder: (BuildContext context)=>super.widget
+                  )
+                  );
+              
+            }),
+          ],
+        );
+      }
+      
+    );
   }
 }
