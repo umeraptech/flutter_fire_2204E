@@ -99,17 +99,23 @@ class _UserScreenState extends State<UserScreen> {
           final users = Users.fromJson(json);
           return Card(
             
-            child: ListTile(
-              //tileColor: Colors.black87,
-              title: Text(users.name,style: Theme.of(context).textTheme.bodyMedium),
-              subtitle: Text(users.comment,style: Theme.of(context).textTheme.bodyMedium,),
-              trailing: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(onPressed: (){}, icon: const Icon(Icons.edit)),
-                  IconButton(onPressed: (){}, icon: const Icon(Icons.delete))
-                ],
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(-1, 0),
+                end: const Offset(0, 0),
+              ).animate(animation),
+              child: ListTile(
+                //tileColor: Colors.black87,
+                title: Text(users.name,style: Theme.of(context).textTheme.bodyMedium),
+                subtitle: Text(users.comment,style: Theme.of(context).textTheme.bodyMedium,),
+                trailing: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(onPressed: (){}, icon: const Icon(Icons.edit)),
+                    IconButton(onPressed: (){}, icon: const Icon(Icons.delete))
+                  ],
+                ),
               ),
             ),
           );
