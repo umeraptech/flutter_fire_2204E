@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_login/screens/task_screen.dart';
+import 'package:firebase_login/screens/user_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
@@ -187,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
                   context, 
                   MaterialPageRoute(
-                    builder: (BuildContext context)=>TaskScreen(displayName: u_name.toString())
+                    builder: (BuildContext context)=>UserScreen(displayName: u_name.toString())
                   )
                   );
      
