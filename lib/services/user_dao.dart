@@ -11,6 +11,15 @@ class UserDao{
     _databaseRef.push().set(user.toJson());
   }
 
+
+  void updateUser(String key, Users users){
+    _databaseRef.child(key).update(users.toMap());
+  }
+
+  void deleteUser(String key){
+    _databaseRef.child(key).remove();
+  }
+
   Query getMessageQuery(){
     if(!kIsWeb){
         FirebaseDatabase.instance.setPersistenceEnabled(true);
